@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/gorilla/mux"
-	"gitlab.com/mickilous/go-greetings-service/hello"
+	"gitlab.com/mickilous/go-greetings-service/greetings"
 	"log"
 	"net/http"
 	"os"
@@ -14,7 +14,7 @@ func main() {
 
 	server := mux.NewRouter()
 
-	helloHandler := hello.NewHelloHandler(logger)
+	helloHandler := greetings.NewGreetingsHandler(logger)
 	helloHandler.SetupRoutes(server)
 
 	logger.Println("Starting server on 8080")

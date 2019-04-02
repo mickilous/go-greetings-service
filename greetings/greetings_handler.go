@@ -1,4 +1,4 @@
-package hello
+package greetings
 
 import (
 	"encoding/json"
@@ -13,8 +13,8 @@ type Handler struct {
 	logger *log.Logger
 }
 
-type Message struct {
-	Message string `json:message`
+type message struct {
+	message string `json:message`
 }
 
 var buddies = map[string]string{
@@ -23,7 +23,7 @@ var buddies = map[string]string{
 	"007": "Bond",
 }
 
-func NewHelloHandler(logger *log.Logger) *Handler {
+func NewGreetingsHandler(logger *log.Logger) *Handler {
 	return &Handler{
 		logger: logger,
 	}
@@ -38,25 +38,25 @@ func (h *Handler) Hello() func(writer http.ResponseWriter, request *http.Request
 		vars := mux.Vars(request)
 		version, userId := vars["version"], vars["userId"]
 		var httpStatus int
-		var message string
+		var ret string
 		switch version {
 		case "v1":
 			httpStatus = http.StatusOK
-			message = fmt.Sprintf("Yo %v!", buddies[userId])
+			ret = fmt.Sprintf("Yo %v!", buddies[userId])
 		case "v2":
 			httpStatus = http.StatusOK
-			message = fmt.Sprintf("Hello %v!", buddies[userId])
+			ret = fmt.Sprintf("Hello %v!", buddies[userId])
 		case "v3":
 			httpStatus = http.StatusOK
-			message = fmt.Sprintf("How do you do %v!", buddies[userId])
+			ret = fmt.Sprintf("How do you do %v!", buddies[userId])
 		default:
 			h.logger.Printf("Unsupported Version %v", version)
 			httpStatus = http.StatusBadRequest
-			message = fmt.Sprintf("Unsupported Version %v", version)
+			ret = fmt.Sprintf("Unsupported Version %v", version)
 		}
 		writer.WriteHeader(httpStatus)
-		json.NewEncoder(writer).Encode(Message{Message: message})
-		//writer.Write([]byte(message))
+		json.NewEncoder(writer).Encode(message{message: ret})
+		//writer.Write([]byte(ret))
 	}
 }
 
@@ -67,7 +67,7 @@ func (h *Handler) MiddleWare(next http.HandlerFunc) http.HandlerFunc {
 		pathRegexp, _ := route.GetPathTemplate()
 		h.logger.Printf("Handling request to %v with parameters :", pathRegexp)
 		for k, v := range vars {
-			h.logger.Printf("\tkey: %v, value: %v", k, v)
+			h.logger.Printf("\t%v : %v", k, v)
 		}
 		before := time.Now()
 		defer h.logger.Printf("Request processed in %v", time.Now().Sub(before))
