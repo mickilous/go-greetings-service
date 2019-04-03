@@ -13,8 +13,8 @@ type Handler struct {
 	logger *log.Logger
 }
 
-type message struct {
-	message string `json:message`
+type Message struct {
+	Message string `json:message`
 }
 
 var buddies = map[string]string{
@@ -55,7 +55,7 @@ func (h *Handler) Hello() func(writer http.ResponseWriter, request *http.Request
 			ret = fmt.Sprintf("Unsupported Version %v", version)
 		}
 		writer.WriteHeader(httpStatus)
-		json.NewEncoder(writer).Encode(message{message: ret})
+		json.NewEncoder(writer).Encode(Message{Message: ret})
 	}
 }
 
