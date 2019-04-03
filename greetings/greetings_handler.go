@@ -14,7 +14,7 @@ type Handler struct {
 }
 
 type Message struct {
-	Message string `json:message`
+	Message string `json:"message"`
 }
 
 var buddies = map[string]string{
