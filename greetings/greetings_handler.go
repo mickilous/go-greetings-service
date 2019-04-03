@@ -23,7 +23,7 @@ var buddies = map[string]string{
 	"007": "Bond",
 }
 
-func NewGreetingsHandler(logger *log.Logger) *Handler {
+func NewHandler(logger *log.Logger) *Handler {
 	return &Handler{
 		logger: logger,
 	}
@@ -56,7 +56,6 @@ func (h *Handler) Hello() func(writer http.ResponseWriter, request *http.Request
 		}
 		writer.WriteHeader(httpStatus)
 		json.NewEncoder(writer).Encode(message{message: ret})
-		//writer.Write([]byte(ret))
 	}
 }
 
@@ -64,10 +63,10 @@ func (h *Handler) MiddleWare(next http.HandlerFunc) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		route, vars := mux.CurrentRoute(request), mux.Vars(request)
-		pathRegexp, _ := route.GetPathTemplate()
-		h.logger.Printf("Handling request to %v with parameters :", pathRegexp)
-		for k, v := range vars {
-			h.logger.Printf("\t%v : %v", k, v)
+		path, _ := route.GetPathTemplate()
+		h.logger.Printf("Handling request to %v with parameters :", path)
+		for key, val := range vars {
+			h.logger.Printf("\t%v : %v", key, val)
 		}
 		before := time.Now()
 		defer h.logger.Printf("Request processed in %v", time.Now().Sub(before))
