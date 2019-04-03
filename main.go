@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/gorilla/mux"
-	"gitlab.com/mickilous/go-greetings-service/greetings"
-	"gitlab.com/mickilous/go-greetings-service/server"
+	"greetings-service/greetings"
+	"greetings-service/server"
 	"log"
 	"os"
 )
