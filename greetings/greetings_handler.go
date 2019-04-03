@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"greetings-service/middleware"
 	"log"
 	"net/http"
-	"time"
 )
 
 type Handler struct {
@@ -30,7 +30,11 @@ func NewHandler(logger *log.Logger) *Handler {
 }
 
 func (h *Handler) SetupRoutes(router *mux.Router) {
-	router.HandleFunc("/{version}/hello/{userId}", h.MiddleWare(h.Hello()))
+	router.HandleFunc("/{version}/hello/{userId}", middleWares(h, h.Hello()))
+}
+
+func middleWares(h *Handler, handlerFunc func(writer http.ResponseWriter, request *http.Request)) func(http.ResponseWriter, *http.Request) {
+	return middleware.NewContentTypeJson().HandlerFunc(middleware.NewRequestLogger(h.logger).HandlerFunc(handlerFunc))
 }
 
 func (h *Handler) Hello() func(writer http.ResponseWriter, request *http.Request) {
@@ -56,20 +60,5 @@ func (h *Handler) Hello() func(writer http.ResponseWriter, request *http.Request
 		}
 		writer.WriteHeader(httpStatus)
 		json.NewEncoder(writer).Encode(Message{Message: ret})
-	}
-}
-
-func (h *Handler) MiddleWare(next http.HandlerFunc) http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		route, vars := mux.CurrentRoute(request), mux.Vars(request)
-		path, _ := route.GetPathTemplate()
-		h.logger.Printf("Handling request to %v with parameters :", path)
-		for key, val := range vars {
-			h.logger.Printf("\t%v : %v", key, val)
-		}
-		before := time.Now()
-		defer h.logger.Printf("Request processed in %v", time.Now().Sub(before))
-		next(writer, request)
 	}
 }
