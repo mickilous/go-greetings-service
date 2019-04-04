@@ -58,9 +58,8 @@ func (h *Handler) Hello() func(writer http.ResponseWriter, request *http.Request
 			httpStatus = http.StatusOK
 			ret = buildMessage("How do you do %v!", userId, isGreetable)
 		default:
-			h.logger.Printf("Unsupported Version %v", version)
-			httpStatus = http.StatusBadRequest
-			ret = fmt.Sprintf("Unsupported Version %v", version)
+			http.Error(writer, fmt.Sprintf("Unsupported Version %v", version), http.StatusBadRequest)
+			return
 		}
 		writer.WriteHeader(httpStatus)
 		json.NewEncoder(writer).Encode(Message{Message: ret})
