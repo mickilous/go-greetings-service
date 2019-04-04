@@ -4,13 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"greetings-service/deserve"
 	"greetings-service/middleware"
 	"log"
 	"net/http"
 )
 
 type Handler struct {
-	logger *log.Logger
+	logger        *log.Logger
+	deserveClient *deserve.Client
 }
 
 type Message struct {
@@ -23,9 +25,10 @@ var buddies = map[string]string{
 	"007": "Bond",
 }
 
-func NewHandler(logger *log.Logger) *Handler {
+func NewHandler(logger *log.Logger, client *deserve.Client) *Handler {
 	return &Handler{
-		logger: logger,
+		logger:        logger,
+		deserveClient: client,
 	}
 }
 
@@ -41,18 +44,19 @@ func (h *Handler) Hello() func(writer http.ResponseWriter, request *http.Request
 	return func(writer http.ResponseWriter, request *http.Request) {
 		vars := mux.Vars(request)
 		version, userId := vars["version"], vars["userId"]
+		isGreetable := h.deserveClient.IsGreetable(userId)
 		var httpStatus int
 		var ret string
 		switch version {
 		case "v1":
 			httpStatus = http.StatusOK
-			ret = fmt.Sprintf("Yo %v!", buddies[userId])
+			ret = buildMessage("Yo %v", userId, isGreetable)
 		case "v2":
 			httpStatus = http.StatusOK
-			ret = fmt.Sprintf("Hello %v!", buddies[userId])
+			ret = buildMessage("Hello %v!", userId, isGreetable)
 		case "v3":
 			httpStatus = http.StatusOK
-			ret = fmt.Sprintf("How do you do %v!", buddies[userId])
+			ret = buildMessage("How do you do %v!", userId, isGreetable)
 		default:
 			h.logger.Printf("Unsupported Version %v", version)
 			httpStatus = http.StatusBadRequest
@@ -60,5 +64,13 @@ func (h *Handler) Hello() func(writer http.ResponseWriter, request *http.Request
 		}
 		writer.WriteHeader(httpStatus)
 		json.NewEncoder(writer).Encode(Message{Message: ret})
+	}
+}
+
+func buildMessage(message string, userId string, isGreetable bool) string {
+	if isGreetable {
+		return fmt.Sprintf(message, buddies[userId])
+	} else {
+		return fmt.Sprintf("Go to hell %v!", buddies[userId])
 	}
 }
