@@ -28,21 +28,26 @@ func NewClient(logger *log.Logger, client *http.Client, srvAddr string) *Client 
 
 func (c *Client) IsGreetable(userId string) bool {
 
-	//httpClient := http.Client{
-	//	Timeout: time.Second * 2, // Maximum of 2 secs
-	//}
-
 	const endPoint = "/deserve/"
+	const defaultRet = true //In doubt let's greet and do not be impolite
+
 	response, err := c.httpClient.Get(c.srvAddr + endPoint + userId)
+	defer response.Body.Close()
 	if err != nil {
 		c.logger.Printf("The HTTP request failed with error %v\n", err)
-		return true //In doubte let's greet and do not be impolite
+		return defaultRet
 	}
-	body, _ := ioutil.ReadAll(response.Body)
+
+	body, errRead := ioutil.ReadAll(response.Body)
+	if errRead != nil {
+		c.logger.Printf("The HTTP body read failed with error %v\n", errRead)
+		return defaultRet //In doubt let's greet and do not be impolite
+	}
 	if response.StatusCode != http.StatusOK {
 		c.logger.Printf("The HTTP request failed with HTTP Code : %v - %v", response.StatusCode, string(body))
-		return true //In doubte let's greet and do not be impolite
+		return defaultRet //In doubt let's greet and do not be impolite
 	}
+
 	deserveMsg := &Message{}
 	json.Unmarshal(body, &deserveMsg)
 	greetable, _ := strconv.ParseBool(deserveMsg.Deserve)
