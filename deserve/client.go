@@ -19,7 +19,7 @@ func NewClient(provider configuration.Provider, logger *log.Logger, client *http
 	return &Client{
 		logger,
 		client,
-		provider.GetString("DESERVE_ADDR", "http://localhost:8090")}
+		provider.GetStringOr("DESERVE_ADDR", "http://localhost:8090")}
 }
 
 type Message struct {
