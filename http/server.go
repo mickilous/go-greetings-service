@@ -2,28 +2,27 @@ package http
 
 import (
 	"github.com/gorilla/mux"
+	"greetings-service/configuration"
 	"log"
 	"net/http"
-	"strconv"
 )
 
 type Server struct {
-	serverPort int
-	logger     *log.Logger
-	router     *mux.Router
+	*log.Logger
+	*mux.Router
+	ServerPort string
 }
 
-func NewServer(serverPort int, logger *log.Logger, router *mux.Router) *Server {
+func NewServer(configurationProvider configuration.Provider, logger *log.Logger, router *mux.Router) *Server {
 	return &Server{
-		serverPort: serverPort,
-		logger:     logger,
-		router:     router,
-	}
+		logger,
+		router,
+		configurationProvider.GetString("SERVER_PORT", "8080")}
 }
 
 func (s *Server) Start() {
-	s.logger.Printf("Starting server on %v", s.serverPort)
-	s.logger.Fatal(
+	s.Logger.Printf("Starting server on %v", s.ServerPort)
+	s.Logger.Fatal(
 		"Startup of server failed",
-		http.ListenAndServe(":"+strconv.Itoa(s.serverPort), s.router))
+		http.ListenAndServe(":"+s.ServerPort, s.Router))
 }
