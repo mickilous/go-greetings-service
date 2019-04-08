@@ -22,7 +22,7 @@ func main() {
 
 	deserveClient := deserve.NewClient(configurationProvider, logger, httpClient)
 
-	greetingsHandler := greetings.NewHandler(logger, deserveClient)
+	greetingsHandler := greetings.NewHandlers(logger, deserveClient)
 	greetingsHandler.SetupRoutes(router)
 
 	http.NewServer(configurationProvider, logger, router).Start()

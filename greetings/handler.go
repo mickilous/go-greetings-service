@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-type Handler struct {
+type Handlers struct {
 	logger        *log.Logger
 	deserveClient *deserve.Client
 }
@@ -25,22 +25,22 @@ var buddies = map[string]string{
 	"007": "Bond",
 }
 
-func NewHandler(logger *log.Logger, client *deserve.Client) *Handler {
-	return &Handler{
+func NewHandlers(logger *log.Logger, client *deserve.Client) *Handlers {
+	return &Handlers{
 		logger:        logger,
 		deserveClient: client,
 	}
 }
 
-func (h *Handler) SetupRoutes(router *mux.Router) {
+func (h *Handlers) SetupRoutes(router *mux.Router) {
 	router.HandleFunc("/{version}/hello/{userId}", middleWares(h, h.Hello()))
 }
 
-func middleWares(h *Handler, handlerFunc func(writer http.ResponseWriter, request *http.Request)) func(http.ResponseWriter, *http.Request) {
+func middleWares(h *Handlers, handlerFunc func(writer http.ResponseWriter, request *http.Request)) func(http.ResponseWriter, *http.Request) {
 	return middleware.NewContentTypeJson().HandlerFunc(middleware.NewRequestLogger(h.logger).HandlerFunc(handlerFunc))
 }
 
-func (h *Handler) Hello() func(writer http.ResponseWriter, request *http.Request) {
+func (h *Handlers) Hello() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		vars := mux.Vars(request)
 		version, userId := vars["version"], vars["userId"]
