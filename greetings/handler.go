@@ -44,19 +44,18 @@ func (h *Handlers) Hello() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		vars := mux.Vars(request)
 		version, userId := vars["version"], vars["userId"]
-		isGreetable := h.deserveClient.IsGreetable(userId)
 		var httpStatus int
 		var ret string
 		switch version {
 		case "v1":
 			httpStatus = http.StatusOK
-			ret = buildMessage("Yo %v", userId, isGreetable)
+			ret = h.buildMessage("Yo %v!", userId)
 		case "v2":
 			httpStatus = http.StatusOK
-			ret = buildMessage("Hello %v!", userId, isGreetable)
+			ret = h.buildMessage("Hello %v!", userId)
 		case "v3":
 			httpStatus = http.StatusOK
-			ret = buildMessage("How do you do %v!", userId, isGreetable)
+			ret = h.buildMessage("How do you do %v!", userId)
 		default:
 			http.Error(writer, fmt.Sprintf("Unsupported Version %v", version), http.StatusBadRequest)
 			return
@@ -66,8 +65,8 @@ func (h *Handlers) Hello() http.HandlerFunc {
 	}
 }
 
-func buildMessage(message string, userId string, isGreetable bool) string {
-	if isGreetable {
+func (h *Handlers) buildMessage(message string, userId string) string {
+	if h.deserveClient.IsGreetable(userId) {
 		return fmt.Sprintf(message, buddies[userId])
 	} else {
 		return fmt.Sprintf("Go to hell %v!", buddies[userId])
