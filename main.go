@@ -14,7 +14,7 @@ func main() {
 
 	logger := log.New(os.Stdout, "greet-srv ", log.LstdFlags|log.Lshortfile)
 
-	configurationProvider := configuration.NewEnvironmentProvider(logger)
+	configurationProvider := configuration.NewEnvironmentProvider()
 
 	httpClient := http.NewClient()
 

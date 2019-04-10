@@ -1,17 +1,15 @@
 package configuration
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"strconv"
 )
 
-type EnvironmentProvider struct {
-	*log.Logger
-}
+type EnvironmentProvider struct{}
 
-func NewEnvironmentProvider(logger *log.Logger) *EnvironmentProvider {
-	return &EnvironmentProvider{Logger: logger}
+func NewEnvironmentProvider() *EnvironmentProvider {
+	return &EnvironmentProvider{}
 }
 
 func (e *EnvironmentProvider) GetString(key string) string {
@@ -26,18 +24,18 @@ func (e *EnvironmentProvider) GetStringOr(key string, fallback string) string {
 	return value
 }
 
-func (e *EnvironmentProvider) GetInt(key string) int {
+func (e *EnvironmentProvider) GetInt(key string) (int, error) {
 	return e.GetIntOr(key, 0)
 }
 
-func (e *EnvironmentProvider) GetIntOr(key string, fallback int) int {
+func (e *EnvironmentProvider) GetIntOr(key string, fallback int) (int, error) {
 	value := os.Getenv(key)
 	if len(value) == 0 {
-		return fallback
+		return fallback, nil
 	}
 	ret, err := strconv.ParseInt(value, 10, 16)
 	if err != nil {
-		e.Logger.Fatalf("Unsupported Int ENV Var - %v : %v", key, value)
+		return 0, fmt.Errorf("unsupported int env var - %v - %v : %v", err, key, value)
 	}
-	return int(ret)
+	return int(ret), nil
 }
